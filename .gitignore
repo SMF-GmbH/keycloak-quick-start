@@ -1,0 +1,9 @@
+# Secrets niemals einchecken – nur .env.example wird versioniert
+.env
+*.env
+!.env.example
+
+# Lokale Daten / Backups
+*.dump
+*.sql
+postgresData/

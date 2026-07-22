@@ -1,0 +1,35 @@
+name: keycloak-quickstart
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:${TAG_KC}
+    # start-dev: nur für Entwicklung/Tests – nicht in Produktivumgebungen!
+    command: start-dev
+    depends_on:
+      - db
+    environment:
+      # Datenbank-Konfiguration
+      KC_DB: postgres
+      KC_DB_URL_HOST: db
+      KC_DB_USERNAME: ${DB_USER}
+      KC_DB_PASSWORD: ${DB_PW}
+      # Temporärer Admin für die Ersteinrichtung
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PW}
+    ports:
+      # HTTP-Port. Produktiv nur TLS nutzen!
+      - "8080:8080"
+
+  db:
+    image: postgres:${TAG_DB}
+    restart: unless-stopped
+    volumes:
+      - postgresData:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PW}
+
+volumes:
+  # Backup-Strategie bedenken!
+  postgresData: {}
