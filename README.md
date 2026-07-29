@@ -6,7 +6,7 @@ produktionsvorbereiteten Docker-Compose-Umgebung mit PostgreSQL.
 > Basiert auf dem Fachbeitrag von Nils Bergmann und Phillip Conrad (SMF, Segment Finance & Public):
 > <https://www.smf.de/keycloak-quick-start/>
 >
-> English version: [README.md](README_EN.md)
+> English version: [README_EN.md](README_EN.md)
 
 Keycloak ist eine Open-Source-Lösung für **Identity & Access Management (IAM)**. Sie ermöglicht die
 zentrale Verwaltung von Benutzeranmeldungen, Authentifizierung und Autorisierung und unterstützt
