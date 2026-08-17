@@ -16,6 +16,13 @@ services:
       # Temporärer Admin für die Ersteinrichtung
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PW}
+
+      # Lokaler Cache, da nur eine Instanz verwendet wird
+      KC_CACHE: local
+
+      # Nur für lokale Entwicklung! HTTP aktivieren und Hostname-Validierung deaktivieren
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME_STRICT: false
     ports:
       # HTTP-Port. Produktiv nur TLS nutzen!
       - "8080:8080"
@@ -24,7 +31,7 @@ services:
     image: postgres:${TAG_DB}
     restart: unless-stopped
     volumes:
-      - postgresData:/var/lib/postgresql/data
+      - postgresData:/var/lib/postgresql
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: ${DB_USER}
