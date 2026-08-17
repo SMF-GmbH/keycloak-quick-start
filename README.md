@@ -1,52 +1,51 @@
-# Keycloak Quick Start mit Docker Compose
+# Keycloak Quick Start with Docker Compose
 
-Schnell und sicher starten mit [Keycloak](https://www.keycloak.org/) – von `docker run` bis zur
-produktionsvorbereiteten Docker-Compose-Umgebung mit PostgreSQL.
+Get started with [Keycloak](https://www.keycloak.org/) quickly and securely – from `docker run` to a
+production-ready Docker Compose setup with PostgreSQL.
 
-> Basiert auf dem Fachbeitrag von Nils Bergmann und Phillip Conrad (SMF, Segment Finance & Public):
-> <https://www.smf.de/keycloak-quick-start/>
->
-> English version: [README.md](README_EN.md)
+> Based on the technical article by Nils Bergmann and Phillip Conrad (SMF, Finance & Public segment):
+> <https://www.smf.de/keycloak-quick-start/> (German version of this Readme)
 
-Keycloak ist eine Open-Source-Lösung für **Identity & Access Management (IAM)**. Sie ermöglicht die
-zentrale Verwaltung von Benutzeranmeldungen, Authentifizierung und Autorisierung und unterstützt
-**OAuth 2.0**, **OpenID Connect** und **SAML** – ganz ohne Lizenzkosten.
 
-**Kernfunktionen**
+Keycloak is an open-source solution for **Identity & Access Management (IAM)**. It enables
+centralized management of user logins, authentication and authorization, and supports
+**OAuth 2.0**, **OpenID Connect** and **SAML** – with no licensing costs.
 
-- Benutzerrollen definieren
-- Single Sign-On (SSO) implementieren
-- Benutzerkonten verwalten
-- Admin-Oberfläche und APIs
-- Self-Service-Funktionen für Benutzer
+**Core features**
+
+- Define user roles
+- Implement Single Sign-On (SSO)
+- Manage user accounts
+- Admin console and APIs
+- Self-service features for users
 
 ---
 
-## Inhaltsverzeichnis
+## Table of Contents
 
-- [Voraussetzungen](#voraussetzungen)
-- [Schritt 1: Keycloak mit Docker starten](#schritt-1-keycloak-mit-docker-starten)
-- [Schritt 2: Keycloak mit einer Datenbank betreiben](#schritt-2-keycloak-mit-einer-datenbank-betreiben)
-- [Schritt 3: Keycloak via Docker Compose starten](#schritt-3-keycloak-via-docker-compose-starten)
-- [Best Practices für Compose-Dateien](#best-practices-für-compose-dateien)
-- [Vom Testsystem zur Produktion](#vom-testsystem-zur-produktion)
-- [Use Cases](#use-cases)
-- [Fazit](#fazit)
+- [Prerequisites](#prerequisites)
+- [Step 1: Start Keycloak with Docker](#step-1-start-keycloak-with-docker)
+- [Step 2: Run Keycloak with a database](#step-2-run-keycloak-with-a-database)
+- [Step 3: Start Keycloak via Docker Compose](#step-3-start-keycloak-via-docker-compose)
+- [Best practices for Compose files](#best-practices-for-compose-files)
+- [From test system to production](#from-test-system-to-production)
+- [Use cases](#use-cases)
+- [Conclusion](#conclusion)
 - [Support & Links](#support--links)
 
 ---
 
-## Voraussetzungen
+## Prerequisites
 
-- Installiertes **Docker** (lokal oder remote) inkl. `docker compose`
-- **Internetzugang** zum Laden der Images
-- Ein freier **Port** (Standard `8080`, alternativ frei wählbar)
+- **Docker** installed (local or remote) including `docker compose`
+- **Internet access** to pull the images
+- A free **port** (default `8080`, or any alternative)
 
 ---
 
-## Schritt 1: Keycloak mit Docker starten
+## Step 1: Start Keycloak with Docker
 
-Der schnellste Einstieg – Keycloak im Entwicklungsmodus, ohne externe Datenbank:
+The fastest way to start – Keycloak in development mode, without an external database:
 
 ```bash
 docker run --name keycloak \
@@ -56,41 +55,40 @@ docker run --name keycloak \
   -d quay.io/keycloak/keycloak:latest start-dev
 ```
 
-Was hier passiert:
+What happens here:
 
-1. Das Keycloak-Image wird von `quay.io/keycloak/keycloak` geladen.
-2. Admin-Benutzer und -Passwort werden per Umgebungsvariablen gesetzt
+1. The Keycloak image is pulled from `quay.io/keycloak/keycloak`.
+2. The admin user and password are set via environment variables
    (`KC_BOOTSTRAP_ADMIN_USERNAME` / `KC_BOOTSTRAP_ADMIN_PASSWORD`).
-3. Container-Port `8080` wird auf Host-Port `8080` gemappt.
-4. Die Admin-Oberfläche ist erreichbar unter <http://localhost:8080/>.
+3. Container port `8080` is mapped to host port `8080`.
+4. The admin console is available at <http://localhost:8080/>.
 
-> **Hinweis:** Ist Port `8080` bereits belegt, mappen Sie auf einen anderen Host-Port,
-> z. B. `-p 9090:8080`.
+> **Note:** If port `8080` is already in use, map to a different host port,
+> e.g. `-p 9090:8080`.
 
-Öffnen Sie <http://localhost:8080> und melden Sie sich an:
+Open <http://localhost:8080> and sign in:
 
-- Benutzername: `admin`
-- Passwort: `admin`
+- Username: `admin`
+- Password: `admin`
 
-Danach können Sie Benutzer, Rollen, Clients und weitere Einstellungen verwalten.
+You can then manage users, roles, clients and other settings.
 
-> ⚠️ `start-dev` ist ausschließlich für Entwicklung und Tests gedacht – **nicht** für die Produktion.
+> ⚠️ `start-dev` is intended for development and testing only – **not** for production.
 
 ---
 
-## Schritt 2: Keycloak mit einer Datenbank betreiben
+## Step 2: Run Keycloak with a database
 
-Ohne externe Datenbank gehen Daten beim Entfernen des Containers verloren. Für persistente
-Speicherung und mehrere Keycloak-Instanzen wird eine externe Datenbank empfohlen – hier
-**PostgreSQL**.
+Without an external database, data is lost when the container is removed. For persistent storage and
+running multiple Keycloak instances, an external database is recommended – here **PostgreSQL**.
 
-**2.1 Netzwerk erstellen**
+**2.1 Create a network**
 
 ```bash
 docker network create keycloak-network
 ```
 
-**2.2 PostgreSQL-Container starten**
+**2.2 Start the PostgreSQL container**
 
 ```bash
 docker run --name keycloak-db \
@@ -101,7 +99,7 @@ docker run --name keycloak-db \
   -d postgres:latest
 ```
 
-**2.3 Keycloak mit DB-Anbindung starten**
+**2.3 Start Keycloak with the database connection**
 
 ```bash
 docker run --name keycloak \
@@ -116,119 +114,116 @@ docker run --name keycloak \
   -d quay.io/keycloak/keycloak:latest start-dev
 ```
 
-**2.4 Umgebungsvariablen erklärt**
+**2.4 Environment variables explained**
 
-| Variable          | Bedeutung                                                        |
-| ----------------- | --------------------------------------------------------------- |
-| `KC_DB`           | Datenbank-Treiber (hier `postgres`)                             |
-| `KC_DB_URL_HOST`  | Adresse der Datenbank (hier der Name des PostgreSQL-Containers) |
-| `KC_DB_USERNAME`  | Benutzername für den Datenbankzugriff                           |
-| `KC_DB_PASSWORD`  | Passwort für den Datenbankzugriff                               |
+| Variable          | Meaning                                                     |
+| ----------------- | ---------------------------------------------------------- |
+| `KC_DB`           | Database driver (here `postgres`)                          |
+| `KC_DB_URL_HOST`  | Database address (here the name of the PostgreSQL container) |
+| `KC_DB_USERNAME`  | Username for database access                               |
+| `KC_DB_PASSWORD`  | Password for database access                               |
 
 ---
 
-## Schritt 3: Keycloak via Docker Compose starten
+## Step 3: Start Keycloak via Docker Compose
 
-Mit Docker Compose lassen sich beide Container in einer Datei konfigurieren und gemeinsam starten.
-Die passenden Dateien liegen in diesem Repo:
+With Docker Compose you can configure and start both containers from a single file. The matching
+files are included in this repo:
 
 - [`docker-compose.yaml`](docker-compose.yaml) – Keycloak + PostgreSQL
-- [`.env.example`](.env.example) – Vorlage für die Konfiguration
+- [`.env.example`](.env.example) – configuration template
 
-**3.1 Konfiguration vorbereiten**
+**3.1 Prepare the configuration**
 
 ```bash
 cp .env.example .env
-# .env öffnen und alle Platzhalter durch sichere Werte ersetzen
+# open .env and replace all placeholders with secure values
 ```
 
-**3.2 Umgebung starten**
+**3.2 Start the environment**
 
 ```bash
 docker compose up
 ```
 
-Anschließend ist Keycloak wieder unter <http://localhost:8080> erreichbar.
+Keycloak is then available again at <http://localhost:8080>.
 
-> **Wichtig:** Ersetzen Sie die Platzhalter in `.env` durch sichere Werte – besonders für
-> produktive Umgebungen. Nutzen Sie für Secrets idealerweise ein Werkzeug wie
-> [SOPS](https://github.com/getsops/sops).
-
----
-
-## Best Practices für Compose-Dateien
-
-- **Versionskontrolle nutzen (Git):** verringert das Risiko von Konfigurationsverlust und macht
-  Änderungen nachvollziehbar.
-- **Keine Secrets in der Compose-Datei:** Passwörter in eine separate `.env`-Datei auslagern und
-  diese **außerhalb** der Versionskontrolle halten (siehe [`.gitignore`](.gitignore)).
-- **Feste Versionsnummern für Images:** kein `latest` verwenden – das vermeidet unerwartete Updates
-  und sichert Nachvollziehbarkeit.
-- **Logging & Monitoring:** Aufbewahrung von Protokollen einplanen, z. B. via `journald` oder
-  ELK-Stack.
+> **Important:** Replace the placeholders in `.env` with secure values – especially for production
+> environments. For secrets, ideally use a tool such as [SOPS](https://github.com/getsops/sops).
 
 ---
 
-## Vom Testsystem zur Produktion
+## Best practices for Compose files
 
-Eine Testumgebung mit persistenter Datenhaltung ist ein guter Anfang. Für den Produktionsbetrieb
-steigen die Anforderungen an Sicherheit, Verfügbarkeit, Compliance und Integrationen. Keycloak folgt
-dem Prinzip **„Secure by Default"** – der Produktionsmodus ist daher anspruchsvoller.
+- **Use version control (Git):** reduces the risk of losing configuration and makes changes
+  traceable.
+- **No secrets in the Compose file:** move passwords into a separate `.env` file and keep it
+  **outside** version control (see [`.gitignore`](.gitignore)).
+- **Pin image versions:** avoid `latest` – this prevents unexpected updates and ensures
+  reproducibility.
+- **Logging & monitoring:** plan for log retention, e.g. via `journald` or the ELK stack.
 
-1. **Vom Entwicklungs- in den Produktionsmodus wechseln** – statt `start-dev`:
+---
+
+## From test system to production
+
+A test environment with persistent storage is a good start. For production use, the requirements for
+security, availability, compliance and integrations increase. Keycloak follows the **"Secure by
+Default"** principle – the production mode is therefore more demanding.
+
+1. **Switch from development to production mode** – instead of `start-dev`:
 
    ```yaml
    command: start
    ```
 
-2. **Festen Hostnamen setzen:**
+2. **Set a fixed hostname:**
 
    ```bash
    KC_HOSTNAME=keycloak.example.com
    ```
 
-3. **TLS (HTTPS) aktivieren** – TLS konfigurieren oder HTTP via `KC_HTTP_ENABLED` erlauben, wenn TLS
-   am Reverse Proxy terminiert wird.
+3. **Enable TLS (HTTPS)** – configure TLS, or allow HTTP via `KC_HTTP_ENABLED` if TLS is terminated
+   at the reverse proxy.
 
-4. **Backup- und Restore-Konzept definieren** – Produktivdaten brauchen ein Backup-Konzept;
-   PostgreSQL bietet automatische Dumps. Dedizierte Datenbankserver bevorzugen.
+4. **Define a backup and restore concept** – production data needs a backup concept; PostgreSQL
+   offers automatic dumps. Prefer dedicated database servers.
 
-5. **Logging- und Monitoring-Strategie** – Anmeldeversuche und Fehler überwachen (`journald` oder
-   ELK-Stack); dabei Datenschutzrichtlinien zur Log-Aufbewahrung beachten. Ohne Logging bleiben
-   Sicherheitsvorfälle unbemerkt.
-
----
-
-## Use Cases
-
-Was Ihre Keycloak-Umgebung jetzt leisten kann:
-
-1. **Neue Authentifizierungsprozesse testen** – SSO für interne Anwendungen, nahtlose Navigation.
-2. **Mehrfaktor-Authentifizierung (MFA)** – YubiKeys, SMS oder andere MFA-Lösungen anbinden.
-3. **Externe Verzeichnisdienste** – Active Directory, LDAP oder Azure AD verbinden (hybride IT).
-4. **OAuth2-Clients integrieren** – Testanwendungen via OAuth2 / OpenID Connect prüfen.
-5. **Datenbank-Backups testen** – PostgreSQL-Integration und automatisierte Backups verifizieren.
-6. **Systemmonitoring** – Prometheus & Grafana für Logins, Rollenänderungen und Fehler.
+5. **Logging and monitoring strategy** – monitor login attempts and errors (`journald` or the ELK
+   stack); observe data protection rules for log retention. Without logging, security incidents go
+   unnoticed.
 
 ---
 
-## Fazit
+## Use cases
 
-Mit diesem Quick Start gelingt ein schneller technischer Einstieg in Keycloak. Der
-produktionstaugliche Einsatz bleibt jedoch vielseitig: Umgang mit Konfigurationsparametern nach
-Updates, DSGVO-konforme Protokollierung, Anbindung von Drittanwendungen, Migration älterer Stände,
-Realm-Struktur, MFA, bestehende Benutzerdatenquellen, Azure-Anbindungen und sauberer Containerbetrieb
-mit horizontaler Skalierung.
+What your Keycloak environment can now do:
+
+1. **Test new authentication flows** – SSO for internal applications, seamless navigation.
+2. **Multi-factor authentication (MFA)** – connect YubiKeys, SMS or other MFA solutions.
+3. **External directory services** – connect Active Directory, LDAP or Azure AD (hybrid IT).
+4. **Integrate OAuth2 clients** – test applications via OAuth2 / OpenID Connect.
+5. **Test database backups** – verify PostgreSQL integration and automated backups.
+6. **System monitoring** – Prometheus & Grafana for logins, role changes and errors.
+
+---
+
+## Conclusion
+
+This Quick Start gives you a fast technical entry into Keycloak. Production-grade operation, however,
+remains multifaceted: handling configuration parameters after updates, GDPR-compliant logging,
+integrating third-party applications, migrating older versions, realm structure, MFA, existing user
+data sources, Azure integrations, and clean container operation with horizontal scaling.
 
 ---
 
 ## Support & Links
 
-- [Keycloak Security Scanner](https://www.smf.de/keycloak-scanner/) – Konfiguration auf
-  Schwachstellen testen
-- [Keycloak Beratung](https://www.smf.de/keycloak-beratung/) – vom Produktivsetup bis zur Integration
-- [Keycloak – Offizielle Dokumentation](https://www.keycloak.org/documentation)
+- [Keycloak Security Scanner](https://www.smf.de/keycloak-scanner/) – test your configuration for
+  vulnerabilities
+- [Keycloak Consulting](https://www.smf.de/keycloak-beratung/) – from production setup to integration
+- [Keycloak – Official Documentation](https://www.keycloak.org/documentation)
 
-**Kontakt**
-Phillip Conrad · Segment Manager Finance & Public
+**Contact**
+Phillip Conrad · Segment Manager Finance & Public · <p.conrad@smf.de>
 SMF GmbH · Paul-Henri-Spaak-Str. 5 · 44263 Dortmund · <info@smf.de> · +49 231 9644-0
