@@ -215,7 +215,3 @@ data sources, Azure integrations, and clean container operation with horizontal 
   vulnerabilities
 - [Keycloak Consulting](https://www.smf.de/keycloak-beratung/) – from production setup to integration
 - [Keycloak – Official Documentation](https://www.keycloak.org/documentation)
-
-**Contact**
-Phillip Conrad · Segment Manager Finance & Public · <p.conrad@smf.de>
-SMF GmbH · Paul-Henri-Spaak-Str. 5 · 44263 Dortmund · <info@smf.de> · +49 231 9644-0
